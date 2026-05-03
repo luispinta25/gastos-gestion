@@ -177,6 +177,13 @@ function renderFontPicker(selectedValue) {
     </button>
   `).join("");
 
+  picker.querySelectorAll(".font-option").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      renderFontPicker(btn.dataset.fontValue);
+      updateSettingsPreview();
+    });
+  });
+
   const selected = picker.querySelector(".is-selected");
   if (selected) selected.scrollIntoView({ block: "nearest" });
 }
@@ -232,6 +239,19 @@ function renderColorPicker(activeColor = accentColorInput?.value || "#6c63ff") {
       style="--swatch: ${tone}"
     ></button>
   `).join("");
+
+  colorFamilies.querySelectorAll("[data-color-family]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      selectedColorFamily = COLOR_FAMILIES.find((f) => f.name === btn.dataset.colorFamily);
+      setAccentColor(selectedColorFamily.base);
+    });
+  });
+
+  colorTones.querySelectorAll("[data-color-tone]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setAccentColor(btn.dataset.colorTone);
+    });
+  });
 }
 
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
@@ -1031,26 +1051,14 @@ settingsForm.addEventListener("change", (event) => {
   }
 });
 
-document.querySelector("#font-picker")?.addEventListener("click", (event) => {
-  const btn = event.target.closest(".font-option");
-  if (!btn) return;
-  renderFontPicker(btn.dataset.fontValue);
-  updateSettingsPreview();
-});
+document.querySelector("#font-picker");
 
 appView.addEventListener("click", async (event) => {
   const familyButton = event.target.closest("button[data-color-family]");
-  if (familyButton) {
-    selectedColorFamily = COLOR_FAMILIES.find((family) => family.name === familyButton.dataset.colorFamily);
-    setAccentColor(selectedColorFamily.base);
-    return;
-  }
+  if (familyButton) return; // handled directly on each button
 
   const toneButton = event.target.closest("button[data-color-tone]");
-  if (toneButton) {
-    setAccentColor(toneButton.dataset.colorTone);
-    return;
-  }
+  if (toneButton) return; // handled directly on each button
 
   const button = event.target.closest("button[data-action]");
   if (!button) return;
