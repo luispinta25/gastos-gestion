@@ -330,8 +330,43 @@ body.app-active .app-shell {
 }
 
 .app-shell[hidden],
-.auth-panel[hidden] {
+.auth-panel[hidden],
+.tabs[hidden] {
   display: none;
+}
+
+.auth-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  transition: opacity 0.3s ease;
+}
+
+.auth-splash.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.auth-splash-mark {
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 72%, #00d4ff));
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--accent) 40%, transparent);
+  animation: splash-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes splash-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 12px 40px color-mix(in srgb, var(--accent) 40%, transparent); }
+  50% { transform: scale(1.07); box-shadow: 0 18px 56px color-mix(in srgb, var(--accent) 55%, transparent); }
 }
 
 .app-header {

@@ -47,6 +47,9 @@
     </script>
   </head>
   <body>
+    <div id="auth-splash" class="auth-splash" aria-hidden="true">
+      <div class="auth-splash-mark">GN</div>
+    </div>
     <main class="shell">
       <section class="brand-panel" aria-label="Resumen de la app">
         <div class="brand-mark" aria-hidden="true">GN</div>
@@ -57,7 +60,7 @@
         <span id="app-version" class="app-version-badge"></span>
       </section>
 
-      <section id="login-view" class="auth-panel" aria-labelledby="login-title">
+      <section id="login-view" class="auth-panel" aria-labelledby="login-title" hidden>
         <div class="panel-heading">
           <p class="eyebrow">Acceso privado</p>
           <h2 id="login-title">Iniciar sesion</h2>

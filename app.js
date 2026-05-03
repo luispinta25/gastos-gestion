@@ -1212,9 +1212,36 @@ document.querySelectorAll(".tab-button").forEach((button) => {
   });
 });
 
+const SESSION_MAX_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const SESSION_KEY = "gn_login_at";
+
+function hideSplash() {
+  const splash = document.getElementById("auth-splash");
+  if (!splash) return;
+  splash.classList.add("is-hidden");
+  setTimeout(() => splash.remove(), 320);
+}
+
 async function loadSession() {
-  const { data } = await supabaseClient.auth.getSession();
-  await applySession(data.session);
+  try {
+    const { data } = await supabaseClient.auth.getSession();
+    const session = data.session;
+
+    if (session) {
+      const loginAt = parseInt(localStorage.getItem(SESSION_KEY) || "0", 10);
+      if (loginAt && Date.now() - loginAt > SESSION_MAX_MS) {
+        await supabaseClient.auth.signOut();
+        localStorage.removeItem(SESSION_KEY);
+        hideSplash();
+        showApp(false);
+        return;
+      }
+    }
+
+    await applySession(session);
+  } finally {
+    hideSplash();
+  }
 }
 
 loginForm.addEventListener("submit", async (event) => {
@@ -1237,6 +1264,8 @@ loginForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  localStorage.setItem(SESSION_KEY, String(Date.now()));
+
   const {
     data: { session },
   } = await supabaseClient.auth.getSession();
@@ -1251,6 +1280,7 @@ loginForm.addEventListener("submit", async (event) => {
 
 logoutButton.addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
+  localStorage.removeItem(SESSION_KEY);
   state.session = null;
   state.userId = null;
   showApp(false);
