@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gastos Naty</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700;800;900&family=Figtree:wght@500;700;800;900&family=Inter:wght@500;700;800;900&family=Lato:wght@400;700;900&family=Montserrat:wght@500;700;800;900&family=Nunito:wght@500;700;800;900&family=Oswald:wght@500;700&family=Outfit:wght@500;700;800;900&family=Playfair+Display:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@500;700;800;900&family=Poppins:wght@500;700;800;900&family=Quicksand:wght@500;700&family=Raleway:wght@500;700;800;900&family=Roboto:wght@400;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="brand-panel" aria-label="Resumen de la app">
+        <div class="brand-mark" aria-hidden="true">GN</div>
+        <div>
+          <p class="eyebrow">Administracion de gastos</p>
+          <h1>Gastos Naty</h1>
+        </div>
+      </section>
+
+      <section id="login-view" class="auth-panel" aria-labelledby="login-title">
+        <div class="panel-heading">
+          <p class="eyebrow">Acceso privado</p>
+          <h2 id="login-title">Iniciar sesion</h2>
+        </div>
+
+        <form id="login-form" class="login-form">
+          <label for="email">Correo</label>
+          <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="correo@ejemplo.com" required />
+
+          <label for="password">Contrasena</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Tu contrasena" required />
+
+          <p id="login-message" class="message" role="status" aria-live="polite"></p>
+
+          <button id="login-button" type="submit">Entrar</button>
+        </form>
+      </section>
+
+      <section id="app-view" class="app-shell" hidden>
+        <header class="app-header">
+          <div>
+            <p class="eyebrow">Sesion activa</p>
+            <h2>Gastos Naty</h2>
+            <p id="profile-name" class="profile-name"></p>
+          </div>
+          <button id="logout-button" class="icon-button" type="button" title="Cerrar sesion" aria-label="Cerrar sesion">
+            <i data-lucide="log-out"></i>
+          </button>
+        </header>
+
+        <p id="app-message" class="app-message" role="status" aria-live="polite"></p>
+
+        <div id="loading-state" class="loading-state">Cargando datos...</div>
+
+        <section id="dashboard-view" class="app-view is-active">
+          <div class="metric-grid">
+            <article class="metric-card">
+              <span>Gastos del mes</span>
+              <strong id="metric-fixed">$0.00</strong>
+            </article>
+            <article class="metric-card">
+              <span>Deuda activa</span>
+              <strong id="metric-debt">$0.00</strong>
+            </article>
+            <article class="metric-card">
+              <span>Ahorro mensual</span>
+              <strong id="metric-savings">$0.00</strong>
+            </article>
+            <article class="metric-card">
+              <span>Proximos cumples</span>
+              <strong id="metric-birthdays">0</strong>
+            </article>
+            <article class="metric-card">
+              <span>Notas pendientes</span>
+              <strong id="metric-reminders">0</strong>
+            </article>
+          </div>
+
+          <div class="content-grid">
+            <section class="section-block">
+              <div class="section-heading">
+                <h3>Deuda por mes</h3>
+              </div>
+              <div id="debt-month-summary" class="list-stack"></div>
+            </section>
+
+            <section class="section-block">
+              <div class="section-heading">
+                <h3>Proximos cumpleaños</h3>
+              </div>
+              <div id="birthday-preview" class="list-stack"></div>
+            </section>
+
+            <section class="section-block">
+              <div class="section-heading">
+                <h3>Recordatorios</h3>
+              </div>
+              <div id="reminder-preview" class="list-stack"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="expenses-view" class="app-view">
+          <section class="section-block">
+            <div class="section-heading">
+              <h3>Gastos fijos y variables</h3>
+              <span id="fixed-total" class="summary-pill">$0.00</span>
+            </div>
+            <form id="fixed-form" class="data-form">
+              <select name="expense_type" aria-label="Tipo de gasto" required>
+                <option value="fixed">Fijo</option>
+                <option value="variable">Variable</option>
+              </select>
+              <input name="name" type="text" placeholder="Nombre del gasto" required />
+              <input name="amount" type="number" min="0" step="0.01" placeholder="Valor" required />
+              <input name="category" type="text" placeholder="Categoria" />
+              <input name="expense_date" type="date" aria-label="Fecha del gasto" />
+              <input name="day_of_month" type="number" min="1" max="31" placeholder="Dia" />
+              <button type="submit"><i data-lucide="plus"></i><span>Agregar gasto</span></button>
+            </form>
+            <div id="fixed-list" class="list-stack"></div>
+          </section>
+        </section>
+
+        <section id="debts-view" class="app-view">
+          <section class="section-block">
+            <div class="section-heading">
+              <h3>Deudas</h3>
+              <span id="debt-total" class="summary-pill">$0.00</span>
+            </div>
+            <form id="debt-form" class="data-form">
+              <input name="person_or_entity" type="text" placeholder="Persona o entidad" required />
+              <input name="total_amount" type="number" min="0" step="0.01" placeholder="Valor total" required />
+              <input name="installment_count" type="number" min="1" step="1" placeholder="Cuotas" required />
+              <input name="first_due_month" type="month" aria-label="Primer mes de vencimiento" required />
+              <input name="description" type="text" placeholder="Descripcion" />
+              <button type="submit"><i data-lucide="plus"></i><span>Agregar deuda</span></button>
+            </form>
+            <div id="debt-list" class="list-stack"></div>
+          </section>
+        </section>
+
+        <section id="savings-view" class="app-view">
+          <section class="section-block">
+            <div class="section-heading">
+              <h3>Cronograma de ahorro</h3>
+              <span id="savings-total" class="summary-pill">$0.00/mes</span>
+            </div>
+            <form id="savings-form" class="data-form">
+              <input name="name" type="text" placeholder="Meta" required />
+              <input name="target_amount" type="number" min="0.01" step="0.01" placeholder="Objetivo" required />
+              <input name="start_month" type="month" required />
+              <input name="end_month" type="month" required />
+              <button type="submit"><i data-lucide="plus"></i><span>Crear meta</span></button>
+            </form>
+            <div id="savings-list" class="list-stack"></div>
+          </section>
+        </section>
+
+        <section id="birthdays-view" class="app-view">
+          <section class="section-block">
+            <div class="section-heading">
+              <h3>Cumpleaños familiares</h3>
+              <span id="birthday-total" class="summary-pill">0</span>
+            </div>
+            <form id="birthday-form" class="data-form">
+              <input name="person_name" type="text" placeholder="Nombre" required />
+              <input name="relationship" type="text" placeholder="Parentesco" />
+              <input name="birth_date" type="date" required />
+              <input name="notes" type="text" placeholder="Notas" />
+              <button type="submit"><i data-lucide="plus"></i><span>Agregar cumple</span></button>
+            </form>
+            <div id="birthday-list" class="list-stack"></div>
+          </section>
+        </section>
+
+        <section id="reminders-view" class="app-view">
+          <section class="section-block">
+            <div class="section-heading">
+              <h3>Notas y recordatorios</h3>
+              <span id="reminder-total" class="summary-pill">0</span>
+            </div>
+            <form id="reminder-form" class="data-form">
+              <input name="title" type="text" placeholder="Titulo" required />
+              <input name="remind_at" type="datetime-local" aria-label="Fecha del recordatorio" />
+              <input name="note" type="text" placeholder="Nota" />
+              <button type="submit"><i data-lucide="plus"></i><span>Agregar nota</span></button>
+            </form>
+            <div id="reminder-list" class="list-stack"></div>
+          </section>
+        </section>
+
+        <section id="settings-view" class="app-view">
+          <section class="section-block">
+            <div class="section-heading">
+              <h3>Personalizacion</h3>
+              <span class="summary-pill">Perfil</span>
+            </div>
+            <form id="settings-form" class="settings-form">
+              <label>
+                Modo
+                <select name="theme_mode">
+                  <option value="auto">Auto</option>
+                  <option value="light">Claro</option>
+                  <option value="dark">Oscuro</option>
+                </select>
+              </label>
+              <label>
+                Color principal
+                <input id="accent-color-value" name="accent_color" type="hidden" value="#6c63ff" />
+                <div id="color-families" class="color-families" aria-label="Familias de color"></div>
+                <div id="color-tones" class="color-tones" aria-label="Tonalidades"></div>
+              </label>
+              <label>
+                Fuente
+                <input type="hidden" name="font_family" id="font-family-input" value="Inter" />
+                <div class="font-picker" id="font-picker" role="listbox" aria-label="Seleccionar fuente"></div>
+              </label>
+              <button type="submit"><i data-lucide="save"></i><span>Guardar ajustes</span></button>
+            </form>
+          </section>
+
+          <section id="settings-preview" class="section-block preview-block">
+            <div>
+              <p class="eyebrow">Vista previa</p>
+              <h3>Tu espacio financiero</h3>
+              <p class="item-meta">Estos ajustes se guardan en tu perfil y se aplican en cualquier dispositivo.</p>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <nav class="tabs" aria-label="Vistas principales" hidden>
+        <button class="tab-button is-active" type="button" data-tab="dashboard"><i data-lucide="layout-dashboard"></i><span>Inicio</span></button>
+        <button class="tab-button" type="button" data-tab="expenses"><i data-lucide="receipt"></i><span>Gastos</span></button>
+        <button class="tab-button" type="button" data-tab="debts"><i data-lucide="credit-card"></i><span>Deudas</span></button>
+        <button class="tab-button" type="button" data-tab="savings"><i data-lucide="piggy-bank"></i><span>Ahorro</span></button>
+        <button class="tab-button" type="button" data-tab="birthdays"><i data-lucide="cake"></i><span>Cumples</span></button>
+        <button class="tab-button" type="button" data-tab="reminders"><i data-lucide="bell-ring"></i><span>Notas</span></button>
+        <button class="tab-button" type="button" data-tab="settings"><i data-lucide="settings"></i><span>Ajustes</span></button>
+      </nav>
+    </main>
+  </body>
+</html>
