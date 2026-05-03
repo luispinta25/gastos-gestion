@@ -324,6 +324,18 @@ function formatMonth(value) {
   }).format(new Date(`${value}T00:00:00`));
 }
 
+function statusLabel(status) {
+  const labels = {
+    active: "Activa",
+    paid: "Pagada",
+    pending: "Pendiente",
+    partial: "Parcial",
+    done: "Hecho",
+  };
+
+  return labels[status] || status || "Sin estado";
+}
+
 function currentMonthKey() {
   return monthStart();
 }
@@ -342,6 +354,25 @@ function nextBirthdayDate(birthDate) {
 
 function emptyState(text) {
   return `<div class="empty-state">${text}</div>`;
+}
+
+function setModalOpen(modalId, isOpen) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.hidden = !isOpen;
+  document.body.classList.toggle("modal-open", Boolean(document.querySelector(".modal-shell:not([hidden])")));
+}
+
+function closeAllModals() {
+  document.querySelectorAll(".modal-shell").forEach((modal) => {
+    modal.hidden = true;
+  });
+  document.body.classList.remove("modal-open");
+}
+
+function closeFormModal(form) {
+  const modal = form.closest(".modal-shell");
+  if (modal) setModalOpen(modal.id, false);
 }
 
 function escapeHtml(value) {
@@ -606,7 +637,10 @@ function renderFixedExpenses() {
 
   container.innerHTML = state.fixedExpenses
     .map((expense) => `
-      <article class="list-item">
+      <article class="list-item gallery-card">
+        <div class="card-icon" aria-hidden="true">
+          <i data-lucide="${(expense.expense_type || "fixed") === "fixed" ? "calendar-days" : "shopping-bag"}"></i>
+        </div>
         <div class="item-top">
           <div>
             <p class="item-title">${escapeHtml(expense.name)}</p>
@@ -643,33 +677,74 @@ function renderDebts() {
       const installments = state.debtInstallments
         .filter((installment) => installment.debt_id === debt.id)
         .sort((a, b) => a.installment_number - b.installment_number);
+      const paidCount = installments.filter((installment) => installment.status === "paid").length;
+      const progress = installments.length ? Math.round((paidCount / installments.length) * 100) : 0;
 
       return `
-        <article class="list-item">
-          <div class="item-top">
-            <div>
-              <p class="item-title">${escapeHtml(debt.person_or_entity)}</p>
-              <p class="item-meta">${escapeHtml(debt.description || "Sin descripcion")} - ${debt.status}</p>
-              <p class="item-meta">${debt.installment_count || installments.length || 1} cuota(s) desde ${formatMonth(debt.first_due_month || debt.due_date)}</p>
+        <article class="list-item gallery-card debt-card">
+          <button class="debt-card-button" type="button" data-action="open-debt-detail" data-id="${debt.id}">
+            <div class="card-icon" aria-hidden="true"><i data-lucide="credit-card"></i></div>
+            <div class="debt-card-main">
+              <div class="item-top">
+                <div>
+                  <p class="item-title">${escapeHtml(debt.person_or_entity)}</p>
+                  <p class="item-meta">${escapeHtml(debt.description || "Sin descripcion")} - ${statusLabel(debt.status)}</p>
+                </div>
+                <strong class="item-amount">${money(debt.current_balance)}</strong>
+              </div>
+              <div class="progress-track" aria-label="Progreso de deuda">
+                <div class="progress-bar" style="width: ${progress}%"></div>
+              </div>
+              <div class="card-stats">
+                <span>${paidCount}/${installments.length || debt.installment_count || 1} cuotas</span>
+                <span>Desde ${formatMonth(debt.first_due_month || debt.due_date)}</span>
+              </div>
             </div>
-            <strong class="item-amount">${money(debt.current_balance)}</strong>
-          </div>
-          <form class="inline-form" data-action="pay-debt" data-id="${debt.id}">
-            <input name="amount" type="number" min="0.01" step="0.01" placeholder="Pago a deuda" ${debt.status !== "active" ? "disabled" : ""} required />
-            <button class="small-button" type="submit" ${debt.status !== "active" ? "disabled" : ""} title="Registrar pago" aria-label="Registrar pago">
-              <i data-lucide="check"></i>
-            </button>
-          </form>
-          ${renderInstallments(installments, debt.status !== "active")}
-          <div class="item-actions">
-            <button class="danger-button" type="button" data-action="delete-debt" data-id="${debt.id}">
-              <i data-lucide="trash-2"></i><span>Eliminar</span>
-            </button>
-          </div>
+            <i class="summary-icon" data-lucide="arrow-up-right"></i>
+          </button>
         </article>
       `;
     })
     .join("");
+}
+
+function renderDebtDetail(debtId) {
+  const debt = state.debts.find((item) => item.id === debtId);
+  const container = document.querySelector("#debt-detail-content");
+  const title = document.querySelector("#debt-detail-title");
+  if (!debt || !container) return;
+
+  const installments = state.debtInstallments
+    .filter((installment) => installment.debt_id === debt.id)
+    .sort((a, b) => a.installment_number - b.installment_number);
+  const paidCount = installments.filter((installment) => installment.status === "paid").length;
+
+  if (title) title.textContent = debt.person_or_entity;
+
+  container.innerHTML = `
+    <div class="detail-summary">
+      <div>
+        <p class="item-meta">${escapeHtml(debt.description || "Sin descripcion")} - ${statusLabel(debt.status)}</p>
+        <p class="item-meta">${paidCount}/${installments.length || debt.installment_count || 1} cuotas pagadas</p>
+      </div>
+      <strong class="item-amount">${money(debt.current_balance)}</strong>
+    </div>
+    <form class="inline-form labeled-inline-form" data-action="pay-debt" data-id="${debt.id}">
+      <label>
+        <span>Pago a deuda</span>
+        <input name="amount" type="number" min="0.01" step="0.01" ${debt.status !== "active" ? "disabled" : ""} required />
+      </label>
+      <button class="small-button" type="submit" ${debt.status !== "active" ? "disabled" : ""} title="Registrar pago" aria-label="Registrar pago">
+        <i data-lucide="check"></i>
+      </button>
+    </form>
+    ${renderInstallments(installments, debt.status !== "active")}
+    <div class="item-actions">
+      <button class="danger-button" type="button" data-action="delete-debt" data-id="${debt.id}">
+        <i data-lucide="trash-2"></i><span>Eliminar</span>
+      </button>
+    </div>
+  `;
 }
 
 function renderInstallments(installments, isDisabled) {
@@ -693,12 +768,18 @@ function renderInstallments(installments, isDisabled) {
                 </div>
                 <div>
                   <strong class="item-amount">${money(installment.amount)}</strong>
-                  <div class="status-pill ${isPaid ? "" : "is-pending"}">${installment.status}</div>
+                  <div class="status-pill ${isPaid ? "" : "is-pending"}">${statusLabel(installment.status)}</div>
                 </div>
               </div>
-              <form class="inline-form" data-action="adjust-installment" data-id="${installment.id}">
-                <input name="amount" type="number" min="${Math.max(Number(installment.paid_amount || 0), 0.01).toFixed(2)}" step="0.01" value="${Number(installment.amount).toFixed(2)}" ${isPaid || isDisabled ? "disabled" : ""} required />
-                <input name="due_month" type="month" value="${installment.due_month.slice(0, 7)}" ${isPaid || isDisabled ? "disabled" : ""} required />
+              <form class="inline-form labeled-inline-form installment-form" data-action="adjust-installment" data-id="${installment.id}">
+                <label>
+                  <span>Valor de cuota</span>
+                  <input name="amount" type="number" min="${Math.max(Number(installment.paid_amount || 0), 0.01).toFixed(2)}" step="0.01" value="${Number(installment.amount).toFixed(2)}" ${isPaid || isDisabled ? "disabled" : ""} required />
+                </label>
+                <label>
+                  <span>Mes de vencimiento</span>
+                  <input name="due_month" type="month" value="${installment.due_month.slice(0, 7)}" ${isPaid || isDisabled ? "disabled" : ""} required />
+                </label>
                 <button class="small-button" type="submit" ${isPaid || isDisabled ? "disabled" : ""} title="Ajustar cuota" aria-label="Ajustar cuota">
                   <i data-lucide="save"></i>
                 </button>
@@ -735,7 +816,8 @@ function renderSavings() {
       const percent = Math.min((saved / Number(goal.target_amount || 1)) * 100, 100);
 
       return `
-        <article class="list-item">
+        <article class="list-item gallery-card">
+          <div class="card-icon" aria-hidden="true"><i data-lucide="piggy-bank"></i></div>
           <div class="item-top">
             <div>
               <p class="item-title">${escapeHtml(goal.name)}</p>
@@ -747,8 +829,15 @@ function renderSavings() {
           <div class="progress-track" aria-label="Progreso de ahorro">
             <div class="progress-bar" style="width: ${percent}%"></div>
           </div>
-          <form class="inline-form" data-action="add-saving" data-id="${goal.id}">
-            <input name="amount" type="number" min="0.01" step="0.01" placeholder="Aporte" required />
+          <div class="card-stats">
+            <span>${Math.round(percent)}% completo</span>
+            <span>Meta ${money(goal.target_amount)}</span>
+          </div>
+          <form class="inline-form labeled-inline-form" data-action="add-saving" data-id="${goal.id}">
+            <label>
+              <span>Aporte</span>
+              <input name="amount" type="number" min="0.01" step="0.01" required />
+            </label>
             <button class="small-button" type="submit" title="Registrar aporte" aria-label="Registrar aporte">
               <i data-lucide="plus"></i>
             </button>
@@ -783,7 +872,8 @@ function renderBirthdays() {
 
   container.innerHTML = birthdays
     .map((birthday) => `
-      <article class="list-item">
+      <article class="list-item gallery-card birthday-card">
+        <div class="card-icon" aria-hidden="true"><i data-lucide="cake"></i></div>
         <div class="item-top">
           <div>
             <p class="item-title">${escapeHtml(birthday.person_name)}</p>
@@ -819,14 +909,15 @@ function renderReminders() {
 
   container.innerHTML = reminders
     .map((reminder) => `
-      <article class="list-item ${reminder.status === "done" ? "installment-row is-paid" : ""}">
+      <article class="list-item gallery-card reminder-card ${reminder.status === "done" ? "is-paid" : ""}">
+        <div class="card-icon" aria-hidden="true"><i data-lucide="${reminder.status === "done" ? "check-circle" : "bell-ring"}"></i></div>
         <div class="item-top">
           <div>
             <p class="item-title">${escapeHtml(reminder.title)}</p>
             <p class="item-meta">${escapeHtml(reminder.note || "Sin nota")}</p>
             <p class="item-meta">${reminder.remind_at ? formatDateTime(reminder.remind_at) : "Sin fecha definida"}</p>
           </div>
-          <span class="status-pill ${reminder.status === "pending" ? "is-pending" : ""}">${reminder.status}</span>
+          <span class="status-pill ${reminder.status === "pending" ? "is-pending" : ""}">${statusLabel(reminder.status)}</span>
         </div>
         <div class="item-actions">
           <button class="small-button" type="button" data-action="toggle-reminder" data-id="${reminder.id}">
@@ -927,6 +1018,7 @@ async function handleSubmit(form, action, options = {}) {
       if (shouldReset) {
         form.reset();
       }
+      closeFormModal(form);
       if (shouldReload) {
         await loadAppData();
       }
@@ -1064,6 +1156,21 @@ appView.addEventListener("click", async (event) => {
   if (!button) return;
 
   const { action, id } = button.dataset;
+
+  if (action === "open-modal" || action === "close-modal") {
+    const modalId = button.dataset.target;
+    setModalOpen(modalId, action === "open-modal");
+    createIcons();
+    return;
+  }
+
+  if (action === "open-debt-detail") {
+    renderDebtDetail(id);
+    setModalOpen("debt-detail-modal", true);
+    createIcons();
+    return;
+  }
+
   button.disabled = true;
   showAppMessage("");
 
@@ -1079,6 +1186,7 @@ appView.addEventListener("click", async (event) => {
 
     if (action === "delete-debt") {
       await deleteRow(TABLES.debts, id);
+      setModalOpen("debt-detail-modal", false);
     }
 
     if (action === "pay-installment") {
@@ -1192,6 +1300,12 @@ appView.addEventListener("submit", async (event) => {
 
     form.reset();
     await loadAppData();
+    if (form.closest("#debt-detail-modal")) {
+      const debtId = action === "adjust-installment"
+        ? state.debtInstallments.find((item) => item.id === id)?.debt_id
+        : id;
+      if (debtId) renderDebtDetail(debtId);
+    }
     showAppMessage("Movimiento registrado.");
   } catch (error) {
     showAppMessage(error.message, true);
@@ -1200,9 +1314,15 @@ appView.addEventListener("submit", async (event) => {
   }
 });
 
+appView.addEventListener("click", (event) => {
+  const modal = event.target.classList?.contains("modal-shell") ? event.target : null;
+  if (modal) setModalOpen(modal.id, false);
+});
+
 document.querySelectorAll(".tab-button").forEach((button) => {
   button.addEventListener("click", () => {
     const tab = button.dataset.tab;
+    closeAllModals();
 
     document.querySelectorAll(".tab-button").forEach((item) => {
       item.classList.toggle("is-active", item === button);

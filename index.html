@@ -145,93 +145,197 @@
 
         <section id="expenses-view" class="app-view">
           <section class="section-block">
-            <div class="section-heading">
-              <h3>Gastos fijos y variables</h3>
-              <span id="fixed-total" class="summary-pill">$0.00</span>
+            <div class="section-heading view-heading">
+              <div>
+                <p class="eyebrow">Control mensual</p>
+                <h3>Gastos</h3>
+              </div>
+              <div class="heading-actions">
+                <span id="fixed-total" class="summary-pill">$0.00</span>
+                <button class="small-button" type="button" data-action="open-modal" data-target="fixed-form-panel">
+                  <i data-lucide="plus"></i><span>Nuevo</span>
+                </button>
+              </div>
             </div>
-            <form id="fixed-form" class="data-form">
-              <select name="expense_type" aria-label="Tipo de gasto" required>
-                <option value="fixed">Fijo</option>
-                <option value="variable">Variable</option>
-              </select>
-              <input name="name" type="text" placeholder="Nombre del gasto" required />
-              <input name="amount" type="number" min="0" step="0.01" placeholder="Valor" required />
-              <input name="category" type="text" placeholder="Categoria" />
-              <input name="expense_date" type="date" aria-label="Fecha del gasto" />
-              <input name="day_of_month" type="number" min="1" max="31" placeholder="Dia" />
-              <button type="submit"><i data-lucide="plus"></i><span>Agregar gasto</span></button>
-            </form>
-            <div id="fixed-list" class="list-stack"></div>
+            <div id="fixed-list" class="gallery-grid"></div>
           </section>
         </section>
 
         <section id="debts-view" class="app-view">
           <section class="section-block">
-            <div class="section-heading">
-              <h3>Deudas</h3>
-              <span id="debt-total" class="summary-pill">$0.00</span>
+            <div class="section-heading view-heading">
+              <div>
+                <p class="eyebrow">Seguimiento por cuotas</p>
+                <h3>Deudas</h3>
+              </div>
+              <div class="heading-actions">
+                <span id="debt-total" class="summary-pill">$0.00</span>
+                <button class="small-button" type="button" data-action="open-modal" data-target="debt-form-panel">
+                  <i data-lucide="plus"></i><span>Nueva</span>
+                </button>
+              </div>
             </div>
-            <form id="debt-form" class="data-form">
-              <input name="person_or_entity" type="text" placeholder="Persona o entidad" required />
-              <input name="total_amount" type="number" min="0" step="0.01" placeholder="Valor total" required />
-              <input name="installment_count" type="number" min="1" step="1" placeholder="Cuotas" required />
-              <input name="first_due_month" type="month" aria-label="Primer mes de vencimiento" required />
-              <input name="description" type="text" placeholder="Descripcion" />
-              <button type="submit"><i data-lucide="plus"></i><span>Agregar deuda</span></button>
-            </form>
-            <div id="debt-list" class="list-stack"></div>
+            <div id="debt-list" class="gallery-grid debt-gallery"></div>
           </section>
         </section>
 
         <section id="savings-view" class="app-view">
           <section class="section-block">
-            <div class="section-heading">
-              <h3>Cronograma de ahorro</h3>
-              <span id="savings-total" class="summary-pill">$0.00/mes</span>
+            <div class="section-heading view-heading">
+              <div>
+                <p class="eyebrow">Metas activas</p>
+                <h3>Ahorro</h3>
+              </div>
+              <div class="heading-actions">
+                <span id="savings-total" class="summary-pill">$0.00/mes</span>
+                <button class="small-button" type="button" data-action="open-modal" data-target="savings-form-panel">
+                  <i data-lucide="plus"></i><span>Nueva</span>
+                </button>
+              </div>
             </div>
-            <form id="savings-form" class="data-form">
-              <input name="name" type="text" placeholder="Meta" required />
-              <input name="target_amount" type="number" min="0.01" step="0.01" placeholder="Objetivo" required />
-              <input name="start_month" type="month" required />
-              <input name="end_month" type="month" required />
-              <button type="submit"><i data-lucide="plus"></i><span>Crear meta</span></button>
-            </form>
-            <div id="savings-list" class="list-stack"></div>
+            <div id="savings-list" class="gallery-grid"></div>
           </section>
         </section>
 
         <section id="birthdays-view" class="app-view">
           <section class="section-block">
-            <div class="section-heading">
-              <h3>Cumpleaños familiares</h3>
-              <span id="birthday-total" class="summary-pill">0</span>
+            <div class="section-heading view-heading">
+              <div>
+                <p class="eyebrow">Calendario familiar</p>
+                <h3>Cumpleaños</h3>
+              </div>
+              <div class="heading-actions">
+                <span id="birthday-total" class="summary-pill">0</span>
+                <button class="small-button" type="button" data-action="open-modal" data-target="birthday-form-panel">
+                  <i data-lucide="plus"></i><span>Nuevo</span>
+                </button>
+              </div>
             </div>
-            <form id="birthday-form" class="data-form">
-              <input name="person_name" type="text" placeholder="Nombre" required />
-              <input name="relationship" type="text" placeholder="Parentesco" />
-              <input name="birth_date" type="date" required />
-              <input name="notes" type="text" placeholder="Notas" />
-              <button type="submit"><i data-lucide="plus"></i><span>Agregar cumple</span></button>
-            </form>
-            <div id="birthday-list" class="list-stack"></div>
+            <div id="birthday-list" class="gallery-grid"></div>
           </section>
         </section>
 
         <section id="reminders-view" class="app-view">
           <section class="section-block">
-            <div class="section-heading">
-              <h3>Notas y recordatorios</h3>
-              <span id="reminder-total" class="summary-pill">0</span>
+            <div class="section-heading view-heading">
+              <div>
+                <p class="eyebrow">Pendientes personales</p>
+                <h3>Notas</h3>
+              </div>
+              <div class="heading-actions">
+                <span id="reminder-total" class="summary-pill">0</span>
+                <button class="small-button" type="button" data-action="open-modal" data-target="reminder-form-panel">
+                  <i data-lucide="plus"></i><span>Nueva</span>
+                </button>
+              </div>
             </div>
-            <form id="reminder-form" class="data-form">
-              <input name="title" type="text" placeholder="Titulo" required />
-              <input name="remind_at" type="datetime-local" aria-label="Fecha del recordatorio" />
-              <input name="note" type="text" placeholder="Nota" />
-              <button type="submit"><i data-lucide="plus"></i><span>Agregar nota</span></button>
-            </form>
-            <div id="reminder-list" class="list-stack"></div>
+            <div id="reminder-list" class="gallery-grid"></div>
           </section>
         </section>
+
+        <div id="fixed-form-panel" class="modal-shell" hidden>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="fixed-form-title">
+            <div class="modal-heading">
+              <h3 id="fixed-form-title">Nuevo gasto</h3>
+              <button class="icon-button modal-close" type="button" data-action="close-modal" data-target="fixed-form-panel" title="Cerrar" aria-label="Cerrar">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <form id="fixed-form" class="data-form labeled-form">
+              <label><span>Tipo de gasto</span><select name="expense_type" required><option value="fixed">Fijo</option><option value="variable">Variable</option></select></label>
+              <label><span>Nombre del gasto</span><input name="name" type="text" required /></label>
+              <label><span>Valor</span><input name="amount" type="number" min="0" step="0.01" required /></label>
+              <label><span>Categoria</span><input name="category" type="text" /></label>
+              <label><span>Fecha del gasto</span><input name="expense_date" type="date" /></label>
+              <label><span>Dia del mes</span><input name="day_of_month" type="number" min="1" max="31" /></label>
+              <button type="submit"><i data-lucide="plus"></i><span>Agregar gasto</span></button>
+            </form>
+          </div>
+        </div>
+
+        <div id="debt-form-panel" class="modal-shell" hidden>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="debt-form-title">
+            <div class="modal-heading">
+              <h3 id="debt-form-title">Nueva deuda</h3>
+              <button class="icon-button modal-close" type="button" data-action="close-modal" data-target="debt-form-panel" title="Cerrar" aria-label="Cerrar">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <form id="debt-form" class="data-form labeled-form">
+              <label><span>Persona o entidad</span><input name="person_or_entity" type="text" required /></label>
+              <label><span>Valor total</span><input name="total_amount" type="number" min="0" step="0.01" required /></label>
+              <label><span>Numero de cuotas</span><input name="installment_count" type="number" min="1" step="1" required /></label>
+              <label><span>Primer mes de vencimiento</span><input name="first_due_month" type="month" required /></label>
+              <label class="form-wide"><span>Descripcion</span><input name="description" type="text" /></label>
+              <button type="submit"><i data-lucide="plus"></i><span>Agregar deuda</span></button>
+            </form>
+          </div>
+        </div>
+
+        <div id="debt-detail-modal" class="modal-shell" hidden>
+          <div class="modal-card detail-modal-card" role="dialog" aria-modal="true" aria-labelledby="debt-detail-title">
+            <div class="modal-heading">
+              <h3 id="debt-detail-title">Detalle de deuda</h3>
+              <button class="icon-button modal-close" type="button" data-action="close-modal" data-target="debt-detail-modal" title="Cerrar" aria-label="Cerrar">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <div id="debt-detail-content" class="modal-detail-content"></div>
+          </div>
+        </div>
+
+        <div id="savings-form-panel" class="modal-shell" hidden>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="savings-form-title">
+            <div class="modal-heading">
+              <h3 id="savings-form-title">Nueva meta</h3>
+              <button class="icon-button modal-close" type="button" data-action="close-modal" data-target="savings-form-panel" title="Cerrar" aria-label="Cerrar">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <form id="savings-form" class="data-form labeled-form">
+              <label><span>Meta</span><input name="name" type="text" required /></label>
+              <label><span>Objetivo</span><input name="target_amount" type="number" min="0.01" step="0.01" required /></label>
+              <label><span>Mes inicial</span><input name="start_month" type="month" required /></label>
+              <label><span>Mes final</span><input name="end_month" type="month" required /></label>
+              <button type="submit"><i data-lucide="plus"></i><span>Crear meta</span></button>
+            </form>
+          </div>
+        </div>
+
+        <div id="birthday-form-panel" class="modal-shell" hidden>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="birthday-form-title">
+            <div class="modal-heading">
+              <h3 id="birthday-form-title">Nuevo cumpleanos</h3>
+              <button class="icon-button modal-close" type="button" data-action="close-modal" data-target="birthday-form-panel" title="Cerrar" aria-label="Cerrar">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <form id="birthday-form" class="data-form labeled-form">
+              <label><span>Nombre</span><input name="person_name" type="text" required /></label>
+              <label><span>Parentesco</span><input name="relationship" type="text" /></label>
+              <label><span>Fecha de nacimiento</span><input name="birth_date" type="date" required /></label>
+              <label><span>Notas</span><input name="notes" type="text" /></label>
+              <button type="submit"><i data-lucide="plus"></i><span>Agregar cumple</span></button>
+            </form>
+          </div>
+        </div>
+
+        <div id="reminder-form-panel" class="modal-shell" hidden>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="reminder-form-title">
+            <div class="modal-heading">
+              <h3 id="reminder-form-title">Nueva nota</h3>
+              <button class="icon-button modal-close" type="button" data-action="close-modal" data-target="reminder-form-panel" title="Cerrar" aria-label="Cerrar">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <form id="reminder-form" class="data-form labeled-form">
+              <label><span>Titulo</span><input name="title" type="text" required /></label>
+              <label><span>Fecha del recordatorio</span><input name="remind_at" type="datetime-local" /></label>
+              <label class="form-wide"><span>Nota</span><input name="note" type="text" /></label>
+              <button type="submit"><i data-lucide="plus"></i><span>Agregar nota</span></button>
+            </form>
+          </div>
+        </div>
 
         <section id="settings-view" class="app-view">
           <section class="section-block">
