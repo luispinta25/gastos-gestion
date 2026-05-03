@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#6c63ff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GastosNaty" />
+    <link rel="manifest" href="./manifest.json" />
     <title>Gastos Naty</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,6 +17,34 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./app.js" defer></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").then((reg) => {
+            // Check for updates on each page load
+            reg.update();
+
+            // Ask active SW for version and display it
+            function queryVersion(sw) {
+              const ch = new MessageChannel();
+              ch.port1.onmessage = (e) => {
+                const badge = document.getElementById("app-version");
+                if (badge && e.data?.version) badge.textContent = "v" + e.data.version;
+              };
+              sw.postMessage({ type: "GET_VERSION" }, [ch.port2]);
+            }
+
+            if (reg.active) queryVersion(reg.active);
+            reg.addEventListener("updatefound", () => {
+              const newSW = reg.installing;
+              newSW.addEventListener("statechange", () => {
+                if (newSW.state === "activated") queryVersion(newSW);
+              });
+            });
+          });
+        });
+      }
+    </script>
   </head>
   <body>
     <main class="shell">
@@ -20,6 +54,7 @@
           <p class="eyebrow">Administracion de gastos</p>
           <h1>Gastos Naty</h1>
         </div>
+        <span id="app-version" class="app-version-badge"></span>
       </section>
 
       <section id="login-view" class="auth-panel" aria-labelledby="login-title">
