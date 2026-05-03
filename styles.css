@@ -93,6 +93,7 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -130,10 +131,21 @@ button {
   box-shadow: 0 12px 26px color-mix(in srgb, var(--accent) 28%, transparent);
   font-weight: 800;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-button:hover {
-  filter: brightness(1.05);
+@media (hover: hover) {
+  button:hover {
+    filter: brightness(1.05);
+  }
+}
+
+@media (hover: none) {
+  button:active {
+    filter: brightness(1.1);
+  }
 }
 
 button:disabled {
@@ -673,11 +685,13 @@ body.app-active .app-shell {
   width: 100%;
   aspect-ratio: 1;
   min-height: 0;
+  min-width: 44px;
   border: 2px solid transparent;
   border-radius: 14px;
   padding: 0;
   background: var(--swatch);
   box-shadow: 0 8px 20px color-mix(in srgb, var(--swatch) 28%, transparent);
+  touch-action: manipulation;
 }
 
 .color-swatch.is-active {

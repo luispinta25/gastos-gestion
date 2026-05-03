@@ -1,4 +1,4 @@
-const APP_VERSION = "1.1.2";
+const APP_VERSION = "1.1.3";
 const CACHE_NAME = `gastos-naty-v${APP_VERSION}`;
 
 const PRECACHE_URLS = [
